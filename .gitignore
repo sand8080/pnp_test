@@ -1,0 +1,6 @@
+.idea
+.env
+*.pyc
+*.egg-info
+pbr-*
+plugins/build
