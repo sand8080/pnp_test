@@ -1,25 +1,20 @@
+import datetime
 from sketch.plugin import ApiPlugin
 
 
 class ExecutionTime(ApiPlugin):
 
+    def __init__(self):
+        self.start = None
+
     def __call__(self, *args, **kwargs):
-        result = "### Execution time. __call__()"
-        print result
-        return result
+        return "### Execution time. __call__()"
 
     def pre(self, *args, **kwargs):
-        result = "### Execution time. pre called"
-        print result
-        return result
+        self.start = datetime.datetime.now()
+        return "### Execution time. pre called"
 
     def post(self, *args, **kwargs):
-        result = "### Execution time. post called"
-        print result
-        return result
-
-
-# if __name__ == '__main__':
-#     e = ExecutionTime()
-#     print "### ", e.namespace
-#     print "ok"
+        return "### Execution time. post called. result: {0}".format(
+            datetime.datetime.now() - self.start
+        )

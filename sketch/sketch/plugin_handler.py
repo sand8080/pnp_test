@@ -34,16 +34,11 @@ def api_hook(name):
     def decorator(func):
         @functools.wraps(func)
         def decorated(*args, **kwargs):
-            print "### in api_hook"
-            key = name
             namespace = 'api_call.observer'
 
-            print "### key, namespase", key, namespace
             with objs_cache_lock:
-                manager = objs_cache.setdefault(key, HookManager(namespace, name, invoke_on_load=True))
+                manager = objs_cache.setdefault(name, HookManager(namespace, name, invoke_on_load=True))
 
-            print "### manager", manager
-            print "### discovered extensions", manager.names()
             plugin_result = []
 
             def handle_pre_api_call(ext):
@@ -61,9 +56,36 @@ def api_hook(name):
             if manager.extensions:
                 plugin_result += manager.map(handle_post_api_call)
 
-            print "### plugin_result", plugin_result
             return json.dumps(plugin_result)
-            return result
+            # return result
         return decorated
     return decorator
 
+
+def api_extension(func):
+    @functools.wraps(func)
+    def decorated(*args, **kwargs):
+        namespace = 'api_call.observer'
+        with objs_cache_lock:
+            manager = objs_cache.setdefault(namespace, ExtensionManager(namespace, invoke_on_load=True))
+
+        plugin_result = []
+
+        def handle_pre_api_call(ext):
+            return ext.name, ext.obj.pre(*args, **kwargs)
+
+        if manager.extensions:
+            plugin_result += manager.map(handle_pre_api_call)
+
+        result = func(*args, **kwargs)
+        plugin_result.append(result)
+
+        def handle_post_api_call(ext):
+            return ext.name, ext.obj.post(*args, **kwargs)
+
+        if manager.extensions:
+            plugin_result += manager.map(handle_post_api_call)
+
+        return json.dumps(plugin_result)
+        # return result
+    return decorated

@@ -15,8 +15,3 @@ class ApiPlugin(object):
     @abc.abstractmethod
     def post(self):
         pass
-
-
-# if __name__ == '__main__':
-#     a = ApiPlugin()
-#     print "ok"
